@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Department Dashboard</title>
+    <style>
+        body {
+          margin: 0;
+          font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+          background: #f5f6fa;
+          color: #333;
+        }
+
+        header {
+          background: linear-gradient(90deg, #2c3e50, #34495e);
+          padding: 20px;
+          color: #fff;
+          text-align: center;
+          font-size: 24px;
+          font-weight: bold;
+          letter-spacing: 1px;
+        }
+
+        .container {
+          max-width: 1200px;
+          margin: 30px auto;
+          background: #fff;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          border-radius: 6px;
+          padding: 30px;
+        }
+
+        h3 {
+          color: #2c3e50;
+          border-bottom: 2px solid #2c3e50;
+          padding-bottom: 5px;
+          margin-bottom: 20px;
+          font-weight: 600;
+        }
+
+        .button-container {
+          text-align: right;
+          margin-bottom: 20px;
+        }
+
+        button {
+          background-color: #2c3e50;
+          color: #fff;
+          font-weight: 500;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+          background-color: #1a252f;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+
+        th, td {
+          border: 1px solid #ccc;
+          padding: 10px;
+          text-align: left;
+          vertical-align: top;
+          font-size: 14px;
+        }
+
+        th {
+          background-color: #34495e;
+          color: #fff;
+        }
+
+        tr:nth-child(even) {
+          background-color: #f2f2f2;
+        }
+
+        select, input[type="text"] {
+          padding: 6px;
+          border-radius: 4px;
+          border: 1px solid #aaa;
+          width: 100%;
+          font-size: 13px;
+          background-color: #fff;
+          color: #333;
+        }
+
+        a {
+          color: #2c3e50;
+          text-decoration: none;
+        }
+
+        a:hover {
+          text-decoration: underline;
+        }
+
+        .action-button {
+          background-color: #2980b9;
+          color: #fff;
+          padding: 5px 10px;
+          border-radius: 4px;
+          font-size: 13px;
+        }
+
+        .action-button:hover {
+          background-color: #1b6391;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    Unified Complaint Box — Department Dashboard
+</header>
+
+<div class="container">
+
+    <div class="button-container">
+        <button onclick="logout()">🚪 Logout</button>
+    </div>
+
+    <h3>Assigned Complaints</h3>
+
+    <div class="table-container">
+        <table id="complaintsTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>User ID</th>
+                <th>Department ID</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Reply</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    const token = localStorage.getItem('deptToken');
+
+    if (!token) {
+      alert('Please login first');
+      window.location.href = 'index.html';
+    }
+
+    async function fetchComplaints() {
+      try {
+        const res = await fetch("http://localhost:8080/api/complaints/department/me", {
+          method: "GET",
+          headers: { "Authorization": "Bearer " + token },
+          credentials: "include"
+        });
+
+        if (!res.ok) {
+          const error = await res.text();
+          alert("Session expired or unauthorized\n\n" + error);
+          logout();
+          return;
+        }
+
+        const complaints = await res.json();
+        const tbody = document.querySelector('#complaintsTable tbody');
+        tbody.innerHTML = '';
+
+        complaints.forEach(c => {
+          const row = document.createElement('tr');
+
+          row.innerHTML = `
+            <td>${c.id}</td>
+            <td>${c.userId}</td>
+            <td>${c.departmentId}</td>
+            <td>${c.description}</td>
+            <td>${c.imageUrl ? `<a href="${c.imageUrl}" target="_blank">View</a>` : 'No Image'}</td>
+            <td>${c.latitude}</td>
+            <td>${c.longitude}</td>
+            <td>${c.location}</td>
+            <td>
+              <select id="status-${c.id}">
+                <option value="PENDING" ${c.status === 'PENDING' ? 'selected' : ''}>Pending</option>
+                <option value="IN_PROGRESS" ${c.status === 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
+                <option value="ON_HOLD" ${c.status === 'ON_HOLD' ? 'selected' : ''}>On Hold</option>
+                <option value="DONE" ${c.status === 'DONE' ? 'selected' : ''}>Done</option>
+              </select>
+            </td>
+            <td><input type="text" id="reply-${c.id}" value="${c.reply || ''}" /></td>
+            <td>${c.createdAt}</td>
+            <td><button class="action-button" onclick="updateComplaint(${c.id})">Update</button></td>
+          `;
+
+          tbody.appendChild(row);
+        });
+
+      } catch (err) {
+        console.error("Error fetching complaints:", err);
+        alert("Something went wrong while loading complaints");
+      }
+    }
+
+    async function updateComplaint(id) {
+      const status = document.getElementById(`status-${id}`).value;
+      const reply = document.getElementById(`reply-${id}`).value;
+
+      const res = await fetch(`http://localhost:8080/api/complaints/${id}/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token
+        },
+        body: JSON.stringify({ status, reply })
+      });
+
+      if (res.ok) {
+        alert('✅ Complaint updated successfully');
+        fetchComplaints();
+      } else {
+        const err = await res.text();
+        alert('❌ Failed to update complaint\n\n' + err);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("deptToken");
+      window.location.href = "index.html";
+    }
+
+    fetchComplaints();
+
+    window.logout = logout;
+    window.updateComplaint = updateComplaint;
+</script>
+
+</body>
+</html>
