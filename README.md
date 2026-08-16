@@ -1,6 +1,6 @@
 # UniBox — Unified Complaint Management System
 
-UniBox is a centralized complaint management system designed to simplify the process of submitting, tracking, managing, and resolving complaints through a structured backend application.
+UniBox is a centralized complaint management system designed to simplify the process of **submitting, tracking, managing, and resolving complaints** through a structured application.
 
 The project was developed using **Java and Spring Boot**, with **REST APIs, JWT authentication, role-based authorization, JPA/Hibernate, and PostgreSQL**.
 
@@ -12,27 +12,29 @@ The project was developed using **Java and Spring Boot**, with **REST APIs, JWT 
 * Complaint creation and submission
 * Complaint tracking and status management
 * Department-based complaint handling
+* Location capture while submitting complaints
+* Image attachment support for complaints
 * Persistent data storage using PostgreSQL
 * RESTful API architecture
-* Layered application architecture
+* Layered backend architecture
 
 ## 🛠️ Tech Stack
 
-| Technology      | Usage                          |
-| --------------- | ------------------------------ |
-| Java            | Backend development            |
-| Spring Boot     | Application framework          |
-| Spring Security | Authentication & authorization |
-| JWT             | Token-based authentication     |
-| REST APIs       | Client-server communication    |
-| JPA / Hibernate | ORM and database interaction   |
-| PostgreSQL      | Database                       |
-| Maven           | Dependency management & build  |
-| Git             | Version control                |
+| Technology          | Usage                            |
+| ------------------- | -------------------------------- |
+| **Java**            | Backend development              |
+| **Spring Boot**     | Application framework            |
+| **Spring Security** | Authentication and authorization |
+| **JWT**             | Token-based authentication       |
+| **REST APIs**       | Client-server communication      |
+| **JPA / Hibernate** | ORM and database interaction     |
+| **PostgreSQL**      | Relational database              |
+| **Maven**           | Dependency management and build  |
+| **Git**             | Version control                  |
 
 ## 🏗️ Architecture
 
-UniBox follows a layered backend architecture:
+UniBox follows a layered backend architecture to separate API handling, business logic, data access, and security concerns.
 
 ```text
 Client
@@ -52,15 +54,18 @@ PostgreSQL Database
 
 * Handles HTTP requests and responses
 * Exposes REST endpoints
+* Validates and processes incoming requests
 
 **Service Layer**
 
 * Contains business logic
-* Processes complaint and user operations
+* Processes user and complaint operations
+* Coordinates between controllers and repositories
 
 **Repository Layer**
 
-* Handles database operations using JPA/Hibernate
+* Handles database operations
+* Uses JPA/Hibernate for persistence
 
 **Security Layer**
 
@@ -70,7 +75,7 @@ PostgreSQL Database
 
 ## 🔐 Authentication & Authorization
 
-UniBox uses JWT-based authentication to secure backend APIs.
+UniBox uses **JWT-based authentication** to secure backend APIs.
 
 The authentication flow is:
 
@@ -88,7 +93,7 @@ JWT Validation
 Role-Based Access
 ```
 
-Different user roles can access functionality according to their permissions.
+Role-based authorization ensures that users can access functionality according to their assigned permissions.
 
 ## 🗄️ Database
 
@@ -102,9 +107,34 @@ Departments
 Complaints
 ```
 
-The database is mapped to Java entities using **JPA/Hibernate**.
+The entities are mapped using **JPA/Hibernate**, allowing the application to perform database operations through the Java persistence layer.
+
+## 📍 Complaint Submission
+
+The complaint submission workflow supports:
+
+* Complaint description
+* Location capture using latitude and longitude
+* Image selection/attachment
+* Complaint submission through the application
+
+Example workflow:
+
+```text
+Enter Complaint Details
+        ↓
+Capture Location
+        ↓
+Attach Image
+        ↓
+Submit Complaint
+        ↓
+Store Complaint in Database
+```
 
 ## 🔌 REST API
+
+The application exposes REST APIs for authentication and complaint management.
 
 Example endpoints include:
 
@@ -116,13 +146,40 @@ GET    /api/complaints/{id}
 PUT    /api/complaints/{id}/status
 ```
 
-> Endpoint names may vary depending on the current implementation.
+> **Note:** These are representative endpoints. Refer to the source code for the exact API paths and request/response structures implemented in the project.
 
 ## 🧪 API Testing
 
-REST APIs were tested using **Postman** to verify request handling, authentication, authorization, status codes, and API responses.
+REST APIs were tested using **Postman** to verify:
 
+* Request handling
+* Authentication
+* Authorization
+* HTTP status codes
+* API responses
+* Complaint-related operations
 
+### Postman API Testing
+
+![UniBox Postman API Testing](Postman%20API%20working%20proof.png)
+
+## 📸 Project Screenshots
+
+### 🔐 Login
+
+![UniBox Login](Login.jpeg)
+
+### 📝 User Registration
+
+![UniBox Registration](Signup.jpeg)
+
+### 🏠 User Dashboard
+
+![UniBox Dashboard](Dashboard.jpeg)
+
+### 📋 Complaint Submission
+
+![UniBox Complaint Submission](Complaint%20Screen.jpeg)
 
 ## 📂 Project Structure
 
@@ -149,28 +206,29 @@ src
 
 ### Prerequisites
 
-Make sure you have:
+Make sure the following are installed:
 
-* JDK 21 or compatible JDK
-* Maven
-* PostgreSQL
-* Git
+* **JDK 21** or compatible JDK
+* **Maven**
+* **PostgreSQL**
+* **Git**
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
 git clone YOUR_GITHUB_REPOSITORY_URL
+cd unibox-backend
 ```
 
 ### 2. Configure PostgreSQL
 
-Create a PostgreSQL database and update the database configuration in:
+Create a PostgreSQL database and configure the database connection in:
 
 ```text
-application.properties
+src/main/resources/application.properties
 ```
 
-Configure:
+Example:
 
 ```properties
 spring.datasource.url=YOUR_DATABASE_URL
@@ -178,13 +236,15 @@ spring.datasource.username=YOUR_USERNAME
 spring.datasource.password=YOUR_PASSWORD
 ```
 
-### 3. Build the project
+> Do not commit actual database passwords, JWT secrets, or other credentials to the repository.
+
+### 3. Build the Project
 
 ```bash
 mvn clean install
 ```
 
-### 4. Run the application
+### 4. Run the Application
 
 ```bash
 mvn spring-boot:run
@@ -194,29 +254,31 @@ The application will start on the configured Spring Boot port.
 
 ## 🎯 What I Learned
 
-Through this project, I gained practical experience with:
+Through UniBox, I gained practical experience in:
 
 * Developing RESTful APIs using Spring Boot
 * Implementing JWT-based authentication
 * Applying role-based authorization
 * Designing relational database structures
-* Working with JPA/Hibernate
+* Working with PostgreSQL
+* Using JPA/Hibernate for database persistence
 * Structuring applications using Controller, Service, and Repository layers
-* Testing APIs using Postman
+* Testing REST APIs using Postman
 * Managing source code using Git
-* Applying software development practices including SDLC and Agile methodologies
+* Understanding the software development lifecycle
+* Applying Agile development practices
 
 ## 🔮 Future Improvements
 
-Potential improvements include:
+Potential improvements for future versions include:
 
 * Email notifications for complaint updates
-* File/image attachments for complaints
 * Advanced complaint filtering and search
-* Analytics dashboard
+* Analytics and reporting dashboard
 * Cloud deployment
-* Automated testing
+* Automated unit and integration testing
 * Docker containerization
+* Improved monitoring and logging
 
 ## 👨‍💻 Author
 
@@ -224,7 +286,9 @@ Potential improvements include:
 
 Aspiring Java Backend Developer
 
-**Core Technologies:** Java | Spring Boot | REST APIs | PostgreSQL | JPA/Hibernate | SQL | Git
+**Core Technologies**
+
+`Java` · `Spring Boot` · `REST APIs` · `PostgreSQL` · `JPA/Hibernate` · `SQL` · `Git`
 
 ---
 
